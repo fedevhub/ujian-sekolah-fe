@@ -49,6 +49,13 @@ const Button = ({
                 </>
             )}
 
+            {isDestructive && (
+                <>
+                    <div className="absolute inset-0 bg-linear-to-b from-[#F04438] to-[#E31B2F]" />
+                    <div className="absolute -inset-px rounded-[10px] border border-[#F97066] pointer-events-none shadow-[inset_0px_0px_2px_0px_#FFF1F1,inset_0px_-1px_1px_0px_#B01212]" />
+                </>
+            )}
+
             {isSecondaryGlossy && (
                 <>
                     <div className="absolute inset-0 bg-linear-to-b from-[#FAFAFA] to-[#FFFFFF]" />

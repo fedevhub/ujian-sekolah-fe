@@ -10,10 +10,10 @@ const Header = ({ onMenuClick }) => {
     const getBreadCrumbs = () => {
         const path = location.pathname;
 
-        const crumbs = [{ label: "Menu", path: "/" }];
+        const crumbs = [{ label: "Menu", path: "/dashboard" }];
 
-        if (path.includes("/")) {
-            crumbs.push({ label: "Home", path: "/" });
+        if (path.includes("/dashboard")) {
+            crumbs.push({ label: "Dashboard" });
         }
 
         return crumbs;
