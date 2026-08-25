@@ -132,7 +132,7 @@ const Pagination = ({
                 </button>
 
                 <div className="flex items-center gap-1 mx-2">
-                    {(getPagNumbers ? getPagNumbers() : getPageNumbers()).map((page, index) => (
+                    {getPageNumbers().map((page, index) => (
                         <button
                             key={index}
                             disabled={page === "..."}

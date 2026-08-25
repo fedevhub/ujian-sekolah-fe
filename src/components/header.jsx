@@ -14,8 +14,28 @@ const Header = ({ onMenuClick }) => {
 
         if (path.includes("/dashboard")) {
             crumbs.push({ label: "Dashboard" });
+        } else if (path.includes('/users')) {
+            crumbs.push({ label: 'Kelola Pengguna', path: '/users'});
+            if (path.includes('/create')) crumbs.push({ label: 'Tambah Pengguna'});
+            if (path.includes('/edit')) crumbs.push({ label: 'Edit Pengguna'});
+        } else if (path.includes('/courses')) {
+            crumbs.push({ label: 'Kelola Kursus', path: '/courses' });
+            if (path.includes('/create')) crumbs.push({ label: 'Tambah Kursus' });
+            if (path.includes('/edit')) crumbs.push({ label: 'Edit Pengguna' });
+        } else if (path.includes('/exams')) {
+            crumbs.push({ label: 'Manajemen Ujian', path: '/exams' });
+            if (path.includes('/create')) crumbs.push({ label: 'Tambah Ujian' });
+            if (path.includes('/edit')) crumbs.push({ label: 'Edit Ujian' });
+            if (path.includes('/questions')) crumbs.push({ label: 'Kelola Soal' });
+        } else if (path.includes('/question-bank')) {
+            crumbs.push({ label: 'Bank Soal', path: '/question-bank' });
+            const courseIdMatch = path.match(/\/question-bank\/course\/(\id+)/);
+            if (courseIdMatch) {
+                crumbs.push({ label: 'Kelola Soal', path: `/question-bank/course/${courseIdMatch[1]}`});
+            }
+            if (path.includes('/create')) crumbs.push({ label: 'Tambah Soal' });
+            if (path.includes('/edit')) crumbs.push({ label: 'Edit Soal' });
         }
-
         return crumbs;
     };
 

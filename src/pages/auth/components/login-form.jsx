@@ -4,6 +4,7 @@ import Input from "../../../components/input";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeSlash } from "@phosphor-icons/react";
 import Button from "../../../components/button";
+import { toast } from "sonner";
 
 const LoginForm = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -33,6 +34,11 @@ const LoginForm = () => {
             navigate("/dashboard");
         } catch (error) {
             console.error("Login failed:", error);
+            toast.error(
+                error.response?.data?.message ||
+                error.message ||
+                "Login gagal. Periksa kembali email dan password Anda.",
+            );
         } finally {
             setLoading(false);
         }

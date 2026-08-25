@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useEffect } from "react";
 import LoginForm from "./components/login-form";
-// Pastikan path import aset (gambar/logo) sesuai dengan struktur folder proyek Anda
 import authDecoration from "../../assets/auth-decoration.png";
 import whiteLogo from "../../assets/white-logo.svg";
 import dashboardAdmin from "../../assets/dashboard-admin.png";
