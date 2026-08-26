@@ -102,3 +102,24 @@ export const useExamQuestions = (examId, enabled = true) => {
         enabled: !!examId && enabled,
     });
 };
+
+// Hook to fetch my active exams (student schedule)
+export const useMyExamsList = (params) => {
+    return useQuery({
+        queryKey: ["my-exams-list", params],
+        queryFn: async () => {
+        const response = await examService.getMyExams(params);
+        if (!response.success) throw new Error("Gagal mengambil jadwal ujian saya");
+        const pagination = response.data?.pagination || {};
+        return {
+            data: response.data?.data || [],
+            pagination: {
+            total_data: pagination.total_data || 0,
+            total_pages: pagination.total_page || 1,
+            current_page: pagination.current_page || 1,
+            limit: pagination.limit || 10
+            }
+        };
+        },
+    });
+};

@@ -15,13 +15,23 @@ const Header = ({ onMenuClick }) => {
         if (path.includes("/dashboard")) {
             crumbs.push({ label: "Dashboard" });
         } else if (path.includes('/users')) {
-            crumbs.push({ label: 'Kelola Pengguna', path: '/users'});
-            if (path.includes('/create')) crumbs.push({ label: 'Tambah Pengguna'});
-            if (path.includes('/edit')) crumbs.push({ label: 'Edit Pengguna'});
+            crumbs.push({ label: 'Kelola Pengguna', path: '/users' });
+            if (path.includes('/create')) crumbs.push({ label: 'Tambah Pengguna' });
+            if (path.includes('/edit')) crumbs.push({ label: 'Edit Pengguna' });
         } else if (path.includes('/courses')) {
             crumbs.push({ label: 'Kelola Kursus', path: '/courses' });
             if (path.includes('/create')) crumbs.push({ label: 'Tambah Kursus' });
-            if (path.includes('/edit')) crumbs.push({ label: 'Edit Pengguna' });
+            if (path.includes('/edit')) crumbs.push({ label: 'Edit Kursus' });
+        } else if (path.includes('/active-exams')) {
+            if (path.includes('/active-exams/detail/')) {
+                const examTitle = location.state?.examTitle || sessionStorage.getItem("currentExamTitle") || "Detail Ujian";
+                crumbs.push({ label: 'Ujian Saya', path: '/active-exams' });
+                crumbs.push({ label: examTitle });
+            } else {
+                crumbs.push({ label: 'Ujian Saya' });
+            }
+        } else if (path.includes('/monitor')) {
+            crumbs.push({ label: 'Monitor Ujian' });
         } else if (path.includes('/exams')) {
             crumbs.push({ label: 'Manajemen Ujian', path: '/exams' });
             if (path.includes('/create')) crumbs.push({ label: 'Tambah Ujian' });
@@ -29,9 +39,9 @@ const Header = ({ onMenuClick }) => {
             if (path.includes('/questions')) crumbs.push({ label: 'Kelola Soal' });
         } else if (path.includes('/question-bank')) {
             crumbs.push({ label: 'Bank Soal', path: '/question-bank' });
-            const courseIdMatch = path.match(/\/question-bank\/course\/(\id+)/);
+            const courseIdMatch = path.match(/\/question-bank\/course\/(\d+)/);
             if (courseIdMatch) {
-                crumbs.push({ label: 'Kelola Soal', path: `/question-bank/course/${courseIdMatch[1]}`});
+                crumbs.push({ label: 'Kelola Soal', path: `/question-bank/course/${courseIdMatch[1]}` });
             }
             if (path.includes('/create')) crumbs.push({ label: 'Tambah Soal' });
             if (path.includes('/edit')) crumbs.push({ label: 'Edit Soal' });
@@ -67,11 +77,15 @@ const Header = ({ onMenuClick }) => {
 
                             <span
                                 className={`tracking-wider ${idx === breadcrumbs.length - 1
-                                        ? "text-white font-medium"
-                                        : "hover:text-white cursor-pointer transition-colors"
+                                    ? "text-white font-medium"
+                                    : "hover:text-white cursor-pointer transition-colors"
                                     }`}
                             >
-                                <Link to={crumb.path}>{crumb.label}</Link>
+                                {crumb.path ? (
+                                    <Link to={crumb.path}>{crumb.label}</Link>
+                                ) : (
+                                    <span>{crumb.label}</span>
+                                )}
                             </span>
                         </Fragment>
                     ))}

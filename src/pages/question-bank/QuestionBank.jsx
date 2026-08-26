@@ -1,19 +1,19 @@
 import { useState, useEffect } from "react";
 import { Plus, CircleNotch, CaretLeft } from "@phosphor-icons/react";
 import { useNavigate, useParams } from "react-router-dom";
-import Button from "../../../components/button";
-import Input from "../../../components/input";
-import Pagination from "../../../components/pagination";
-import Modal from "../../../components/modal";
+import Button from "../../components/button";
+import Input from "../../components/input";
+import Pagination from "../../components/pagination";
+import Modal from "../../components/modal";
 import QuestionTable from "./components/question-table";
 import QuestionDelete from "./components/question-delete";
-import FilterDropdown from "../../../components/filter-dropdown";
+import FilterDropdown from "../../components/filter-dropdown";
 import {
     useQuestionsByCourse,
     useDeleteQuestion,
-} from "../../../hooks/useQuestions";
-import { useDebounce } from "../../../hooks/useDebounce";
-import { useDisclosure } from "../../../hooks/useDisclosure";
+} from "../../hooks/useQuestions";
+import { useDebounce } from "../../hooks/useDebounce";
+import { useDisclosure } from "../../hooks/useDisclosure";
 
 const QuestionBank = () => {
     const navigate = useNavigate();

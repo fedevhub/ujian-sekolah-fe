@@ -31,12 +31,28 @@ export const examService = {
     },
     assignQuestions: async (examId, questionIds) => {
         const response = await api.patch(`/exams/${examId}/questions`, {
-            question_ids: questionIds,
+        question_ids: questionIds,
         });
         return response.data;
     },
     getQuestions: async (examId) => {
         const response = await api.get(`/exams/${examId}/questions`);
+        return response.data;
+    },
+    getExamDetail: async (id) => {
+        const response = await api.get(`/exam-attempts/${id}/detail`);
+        return response.data;
+    },
+    submitAnswer: async (examId, data) => {
+        const response = await api.post(`/exam-attempts/${examId}/answer`, data);
+        return response.data;
+    },
+    submitExam: async (examId) => {
+        const response = await api.post(`/exam-attempts/${examId}/submit`);
+        return response.data;
+    },
+    getMyAttempt: async (examId) => {
+        const response = await api.get(`/exam-attempts/my-attempts/${examId}`);
         return response.data;
     },
 };

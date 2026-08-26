@@ -1,7 +1,7 @@
 import { PencilSimpleLine, TrashSimple } from "@phosphor-icons/react";
-import Table from "../../../../components/table";
-import Button from "../../../../components/button";
-import Badge from "../../../../components/badge";
+import Table from "../../../components/table";
+import Button from "../../../components/button";
+import Badge from "../../../components/badge";
 
 const QuestionTable = ({
     questions = [],
