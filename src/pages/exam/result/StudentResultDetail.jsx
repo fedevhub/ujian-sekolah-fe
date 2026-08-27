@@ -5,6 +5,7 @@ import Button from "../../../components/button";
 import { formatDateTimeWithComma } from "../../../utils/date";
 import { CaretLeft, BookOpen, Clock, XCircle } from "@phosphor-icons/react";
 import CorrectionCard from "./components/correction-card";
+import { isMultipleChoiceQuestion } from "../../../hooks/useExamWorkspace";
 
 const StudentResultDetail = () => {
     const navigate = useNavigate();
@@ -45,7 +46,6 @@ const StudentResultDetail = () => {
                         questions: (attemptData.questions || []).map((q) => {
                             const isMultipleChoice = isMultipleChoiceQuestion(q);
                             const ans = q.answer || {};
-
                             return {
                                 id: q.id,
                                 question_text: q.question_text,
@@ -66,7 +66,6 @@ const StudentResultDetail = () => {
                             };
                         }),
                     };
-
                     setExam(examData);
                 } else {
                     setError(attemptResponse.message || "Gagal mengambil detail ujian");
@@ -93,9 +92,7 @@ const StudentResultDetail = () => {
 
     if (error) {
         return (
-            <div
-                className="flex flex-col items-center justify-center min-h-[calc(100vh-48px)] p-6 bg-white rounded-2xl border border-[#EAECF0]"
-            >
+            <div className="flex flex-col items-center justify-center min-h-[calc(100vh-48px)] p-6 bg-white rounded-2xl border border-[#EAECF0]">
                 <XCircle size={48} className="text-red-500 mb-4" />
                 <h2 className="text-lg font-semibold text-gray-900 mb-2">
                     Terjadi Kesalahan
@@ -116,9 +113,7 @@ const StudentResultDetail = () => {
 
     if (!exam) {
         return (
-            <div
-                className="flex flex-col items-center justify-center min-h-[calc(100vh-48px)] p-6 bg-white rounded-2xl border border-[#EAECF0]"
-            >
+            <div className="flex flex-col items-center justify-center min-h-[calc(100vh-48px)] p-6 bg-white rounded-2xl border border-[#EAECF0]">
                 <BookOpen size={48} className="text-gray-400 mb-4" />
                 <h2 className="text-lg font-semibold text-gray-900 mb-2">
                     Ujian Tidak Ditemukan
@@ -144,9 +139,7 @@ const StudentResultDetail = () => {
     return (
         <div className="flex flex-col w-full min-h-[calc(100vh-48px)] bg-transparent">
             {/* White container wrapper */}
-            <div
-                className="bg-white rounded-2xl border border-[#EAECF0] overflow-hidden flex flex-col p-6 md:p-8"
-            >
+            <div className="bg-white rounded-2xl border border-[#EAECF0] overflow-hidden flex flex-col p-6 md:p-8">
                 {/* Back Button */}
                 <div className="mb-6">
                     <Button
@@ -161,9 +154,7 @@ const StudentResultDetail = () => {
                 </div>
 
                 {/* Exam Title & Score Header Section */}
-                <div
-                    className="flex flex-col md:flex-row justify-between items-start md:items-center pb-6 border-b border-[#F2F4F7] gap-4 mb-6"
-                >
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center pb-6 border-b border-[#F2F4F7] gap-4 mb-6">
                     <div className="flex flex-col gap-2">
                         <h1 className="text-xl md:text-2xl font-semibold text-[#1D2939]">
                             {exam.title}
@@ -181,12 +172,8 @@ const StudentResultDetail = () => {
                     </div>
 
                     {/* Final Score Display without stats */}
-                    <div
-                        className="flex flex-col items-center justify-center whitespace-nowrap self-stretch md:self-auto border-t md:border-t-0 pt-4 md:pt-0 border-gray-100"
-                    >
-                        <span
-                            className="text-xs font-semibold text-[#475467] uppercase tracking-wider mb-2 text-center w-full"
-                        >
+                    <div className="flex flex-col items-center justify-center whitespace-nowrap self-stretch md:self-auto border-t md:border-t-0 pt-4 md:pt-0 border-gray-100">
+                        <span className="text-xs font-semibold text-[#475467] uppercase tracking-wider mb-2 text-center w-full">
                             Nilai Akhir
                         </span>
                         {exam.attempt?.score !== null &&
@@ -197,9 +184,7 @@ const StudentResultDetail = () => {
                             </div>
                         ) : (
                             <div className="flex flex-col items-center gap-2 w-full">
-                                <div
-                                    className="w-10 h-10 rounded-xl bg-[#FFFAEB] border border-[#FEDF89] flex items-center justify-center"
-                                >
+                                <div className="w-10 h-10 rounded-xl bg-[#FFFAEB] border border-[#FEDF89] flex items-center justify-center">
                                     <Clock size={20} className="text-[#B54708]" weight="bold" />
                                 </div>
                                 <span className="text-sm font-semibold text-[#B54708] text-center w-full">
@@ -210,6 +195,7 @@ const StudentResultDetail = () => {
                     </div>
                 </div>
 
+                {/* Questions List */}
                 <div className="flex flex-col gap-6">
                     {questions.map((q, idx) => (
                         <CorrectionCard

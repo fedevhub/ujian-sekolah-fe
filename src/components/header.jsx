@@ -39,13 +39,30 @@ const Header = ({ onMenuClick }) => {
             if (path.includes('/questions')) crumbs.push({ label: 'Kelola Soal' });
         } else if (path.includes('/question-bank')) {
             crumbs.push({ label: 'Bank Soal', path: '/question-bank' });
-            const courseIdMatch = path.match(/\/question-bank\/course\/(\d+)/);
+            const courseIdMatch = path.match(/\/question-bank\/(\d+)/);
             if (courseIdMatch) {
-                crumbs.push({ label: 'Kelola Soal', path: `/question-bank/course/${courseIdMatch[1]}` });
+                crumbs.push({ label: 'Kelola Soal', path: `/question-bank/${courseIdMatch[1]}` });
             }
             if (path.includes('/create')) crumbs.push({ label: 'Tambah Soal' });
             if (path.includes('/edit')) crumbs.push({ label: 'Edit Soal' });
+        } else if (path.includes('/history')) {
+            if (path.includes('/history/detail/')) {
+                const examTitle = location.state?.examTitle || sessionStorage.getItem("currentExamTitle") || "Detail Ujian";
+                crumbs.push({ label: 'Riwayat & Hasil', path: '/history' });
+                crumbs.push({ label: examTitle });
+                crumbs.push({ label: 'Hasil Ujian' });
+            } else {
+                crumbs.push({ label: 'Riwayat & Hasil' });
+            }
+        } else if (path.includes('/results')) {
+            if (path.includes('/results/correction/')) {
+                crumbs.push({ label: 'Hasil & Evaluasi', path: '/results' });
+                crumbs.push({ label: 'Detail Koreksi' });
+            } else {
+                crumbs.push({ label: 'Hasil & Evaluasi' });
+            }
         }
+
         return crumbs;
     };
 

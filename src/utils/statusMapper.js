@@ -3,9 +3,14 @@ export const formatExamStatus = (status) => {
   const statusLower = status.toLowerCase();
 
   if (statusLower === "tersedia") return "Tersedia";
-  if (["selesai", "completed", "submitted", "finished"].includes(statusLower))
+  if (
+    ["selesai", "completed", "submitted", "finished", "graded"].includes(
+      statusLower,
+    )
+  )
     return "Selesai";
-  if (statusLower === "terlewat") return "Terlewat";
+  if (["terlewat", "overdue", "missed", "expired"].includes(statusLower))
+    return "Terlewat";
   if (statusLower === "sedang review" || statusLower === "pending")
     return "Sedang Review";
   if (

@@ -18,6 +18,9 @@ import QuestionForm from "./pages/question-bank/QuestionForm";
 import ActiveExams from "./pages/exam/session/ActiveExams";
 import ExamWorkspace from "./pages/exam/session/ExamWorkspace";
 import StudentResultDetail from "./pages/exam/result/StudentResultDetail";
+import ExamHistory from "./pages/exam/result/ExamHistory";
+import CorrectionDetail from "./pages/exam/result/CorrectionDetail";
+import ExamMonitoring from "./pages/exam/monitoring/ExamMonitoring";
 
 const App = () => {
   return (
@@ -44,6 +47,7 @@ const App = () => {
                 <Route path="edit/:id" element={<CourseForm mode="edit" />} />
                 <Route path=":id/students" element={<StudentManagement />} />
               </Route>
+              <Route path="/monitor" element={<ExamMonitoring />} />
             </Route>
 
             {/* Teacher Routes */}
@@ -63,6 +67,11 @@ const App = () => {
                   <Route path="edit/:questionId" element={<QuestionForm mode="edit" />} />
                 </Route>
               </Route>
+
+              <Route path="/results">
+                <Route index element={<ExamHistory />} />
+                <Route path="correction/:id" element={<CorrectionDetail />} />
+              </Route>
             </Route>
 
             <Route element={<ProtectedRoute allowedRoles={['student']} />}>
@@ -70,7 +79,12 @@ const App = () => {
                 <Route index element={<ActiveExams />} />
                 <Route path="detail/:id" element={<StudentResultDetail />} />
               </Route>
-              <Route path="/active-exams/:id/take">
+              <Route path="/history">
+                <Route index element={<ExamHistory />} />
+                <Route path="detail/:id" element={<StudentResultDetail />} />
+              </Route>
+              <Route path="/question" element={<Navigate to="/history" replace />} />
+              <Route path="/active-exams/:id/take" element={<ProtectedRoute allowedRoles={['student']} />}>
                 <Route index element={<ExamWorkspace />} />
               </Route>
             </Route>

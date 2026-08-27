@@ -60,7 +60,7 @@ const CourseList = () => {
                         <CourseCard
                             key={course.id}
                             course={course}
-                            onClick={() => navigate(`/question-bank/course/${course.id}`)}
+                            onClick={() => navigate(`/question-bank/${course.id}`)}
                         />
                     ))}
                 </div>

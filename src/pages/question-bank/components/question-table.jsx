@@ -12,16 +12,16 @@ const QuestionTable = ({
 }) => {
     const columns = [
         {
-            header: "Id",
+            header: "No",
             render: (row) => (currentPage - 1) * limit + questions.indexOf(row) + 1,
             className: "w-[60px] text-gray-500",
         },
         {
             header: "Daftar Pertanyaan",
             render: (row) => (
-                <div className="flex flex-col max-w-100">
-                    <span className="font-medium text-[#344054] leading-relaxed line-clamp-4">
-                        {row.question_text}
+                <div className="flex flex-col">
+                    <span className="font-medium text-[#344054] line-clamp-2">
+                        {row.question_text || row.question || "-"}
                     </span>
                 </div>
             ),
@@ -44,7 +44,7 @@ const QuestionTable = ({
             header: "Ujian Tertaut",
             render: (row) => (
                 <div className="flex justify-start">
-                    <Badge variant="primary">{row.total_exams} Ujian</Badge>
+                    <Badge variant="primary">{row.total_exams || 0} Ujian</Badge>
                 </div>
             ),
         },

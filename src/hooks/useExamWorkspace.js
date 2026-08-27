@@ -7,6 +7,59 @@ import { examService } from "../services/examService";
 export const isMultipleChoiceQuestion = (question) =>
   question?.type === "multiple_choice" || question?.type === "Pilihan Ganda";
 
+const normalizeQuestionOptions = (question) => {
+  const nestedQuestion = question?.question;
+  const rawOptions =
+    question?.options ??
+    question?.question_options ??
+    question?.answer_options ??
+    question?.choices ??
+    (typeof nestedQuestion === "object" ? nestedQuestion.options : undefined) ??
+    [];
+
+  const sortOptions = (options) =>
+    options
+      .map((option, index) => ({ option, index }))
+      .sort((a, b) => {
+        const getOrder = ({ option, index }) => {
+          if (!option || typeof option !== "object") return index;
+          const order =
+            option.order ??
+            option.sort_order ??
+            option.position ??
+            option.id ??
+            option.option_id;
+          const numericOrder = Number(order);
+          return Number.isFinite(numericOrder) ? numericOrder : index;
+        };
+
+        return getOrder(a) - getOrder(b);
+      })
+      .map(({ option }) => option);
+
+  if (Array.isArray(rawOptions)) return sortOptions(rawOptions);
+  if (Array.isArray(rawOptions?.data)) return sortOptions(rawOptions.data);
+  if (typeof rawOptions !== "string") return [];
+
+  try {
+    const parsedOptions = JSON.parse(rawOptions);
+    return Array.isArray(parsedOptions)
+      ? sortOptions(parsedOptions)
+      : Array.isArray(parsedOptions?.data)
+        ? sortOptions(parsedOptions.data)
+        : [];
+  } catch {
+    return [];
+  }
+};
+
+const normalizeQuestion = (question) => ({
+  ...question,
+  options: normalizeQuestionOptions(question),
+});
+
+const loadQuestionOptions = (questions) => questions.map(normalizeQuestion);
+
 const normalizeSelectedOption = (question, answerValue) => {
   if (!question?.options || !answerValue) return undefined;
 
@@ -107,8 +160,9 @@ export const useExamWorkspace = () => {
           return;
         }
 
+        const examQuestions = loadQuestionOptions(examData.questions || []);
         const initialAnswers = {};
-        (examData.questions || []).forEach((question) => {
+        examQuestions.forEach((question) => {
           const matchedAnswer = attemptData.answers?.find(
             (answer) => String(answer.question_id) === String(question.id),
           );
@@ -161,7 +215,7 @@ export const useExamWorkspace = () => {
           }
         });
 
-        setQuestions(examData.questions || []);
+        setQuestions(examQuestions);
         setAnswers(initialAnswers);
 
         if (attemptData.status === "in_progress") {
@@ -245,12 +299,22 @@ export const useExamWorkspace = () => {
       }));
 
       try {
+        const selectedOptionId = Number(value);
+        if (!Number.isInteger(selectedOptionId)) {
+          throw new Error("ID opsi jawaban tidak valid");
+        }
+
         await examService.submitAnswer(id, {
-          question_id: activeQuestion.id,
-          selected_option_id: value.toString(),
+          question_id: Number(activeQuestion.id),
+          selected_option_id: selectedOptionId,
         });
       } catch (error) {
         console.error("Error saving answer:", error);
+        toast.error(
+          error.response?.data?.message ||
+            error.message ||
+            "Gagal menyimpan jawaban",
+        );
       }
     },
     [currentIndex, id, questions],

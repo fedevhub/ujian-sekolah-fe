@@ -33,6 +33,21 @@ const toDatetimeLocal = (dateStr) => {
     }
 };
 
+const getTimezoneOffset = (date) => {
+    const offset = -date.getTimezoneOffset();
+    const sign = offset >= 0 ? "+" : "-";
+    const hours = String(Math.floor(Math.abs(offset) / 60)).padStart(2, "0");
+    const minutes = String(Math.abs(offset) % 60).padStart(2, "0");
+    return `${sign}${hours}:${minutes}`;
+};
+
+const toApiDatetime = (dateStr) => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    const datetime = dateStr.length === 16 ? `${dateStr}:00` : dateStr;
+    return `${datetime}${getTimezoneOffset(date)}`;
+};
+
 const ExamForm = ({ mode = "create" }) => {
     const navigate = useNavigate();
     const { id } = useParams();
@@ -68,26 +83,63 @@ const ExamForm = ({ mode = "create" }) => {
     }, [examDetail, isEdit]);
 
     const saving = createExamMutation.isPending || updateExamMutation.isPending;
+    const getMinStartTime = () => {
+        const now = new Date();
+
+        // Tambah 1 menit
+        now.setMinutes(now.getMinutes() + 1);
+
+        // Set detik dan milidetik ke 0
+        now.setSeconds(0);
+        now.setMilliseconds(0);
+
+        return toDatetimeLocal(now);
+    };
+
+    const minStartTime = getMinStartTime();
 
     const handleSave = async () => {
         if (!title.trim()) {
             toast.error("Silahkan isi judul ujian");
             return;
         }
+
         if (!courseId) {
             toast.error("Silahkan pilih kursus/mata pelajaran");
             return;
         }
+
         if (!duration || Number(duration) <= 0) {
             toast.error("Silahkan isi durasi yang valid");
             return;
         }
+
         if (!startTime) {
             toast.error("Silahkan isi waktu mulai");
             return;
         }
+
         if (!endTime) {
             toast.error("Silahkan isi waktu selesai");
+            return;
+        }
+
+        const startDate = new Date(startTime);
+        const endDate = new Date(endTime);
+
+        // Minimal waktu mulai = 1 menit dari sekarang
+        const now = new Date();
+        now.setMinutes(now.getMinutes() + 1);
+        now.setSeconds(0);
+        now.setMilliseconds(0);
+
+        if (startDate < now) {
+            toast.error("Waktu mulai harus setelah waktu sekarang");
+            return;
+        }
+
+        if (endDate <= startDate) {
+            toast.error("Waktu selesai harus setelah waktu mulai");
             return;
         }
 
@@ -96,20 +148,39 @@ const ExamForm = ({ mode = "create" }) => {
             course_id: Number(courseId),
             description,
             duration: Number(duration),
-            start_time: new Date(startTime).toISOString(),
-            end_time: new Date(endTime).toISOString(),
+            start_time: toApiDatetime(startTime),
+            end_time: toApiDatetime(endTime),
         };
 
         try {
             if (isEdit) {
-                await updateExamMutation.mutateAsync({ id, data: payload });
+                await updateExamMutation.mutateAsync({
+                    id,
+                    data: payload
+                });
             } else {
                 await createExamMutation.mutateAsync(payload);
             }
+
             navigate("/exams");
+
         } catch (error) {
             console.error("Error saving exam:", error);
-            toast.error("Gagal menyimpan ujian. Pastikan data benar atau coba lagi.");
+            console.error("Exam save response:", error.response?.data);
+
+            const serverMessage =
+                error.response?.data?.message ||
+                error.response?.data?.errors;
+
+            const message =
+                typeof serverMessage === "object"
+                    ? Object.values(serverMessage).flat().join(" ")
+                    : serverMessage;
+
+            toast.error(
+                message ||
+                "Gagal menyimpan ujian. Pastikan data benar atau coba lagi."
+            );
         }
     };
 
@@ -140,7 +211,7 @@ const ExamForm = ({ mode = "create" }) => {
                 </div>
 
                 {/* Right Section - Form */}
-                <div className="flex flex-col gap-6 lg:flex-i max-w-2xl">
+                <div className="flex flex-col gap-6 lg:flex-1 max-w-2xl">
                     <Input
                         label="Judul Ujian"
                         placeholder="Masukkan judul ujian..."
@@ -199,6 +270,7 @@ const ExamForm = ({ mode = "create" }) => {
                             type="datetime-local"
                             className="[&>div]:h-11 [&>div]:rounded-xl [&_input]:cursor-pointer"
                             value={startTime}
+                            min={minStartTime}
                             onChange={(e) => setStartTime(e.target.value)}
                         />
                         <Input
@@ -206,6 +278,7 @@ const ExamForm = ({ mode = "create" }) => {
                             type="datetime-local"
                             className="[&>div]:h-11 [&>div]:rounded-xl [&_input]:cursor-pointer"
                             value={endTime}
+                            min={startTime || minStartTime}
                             onChange={(e) => setEndTime(e.target.value)}
                         />
                     </div>

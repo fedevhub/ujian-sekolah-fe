@@ -4,31 +4,63 @@ import { isMultipleChoiceQuestion } from "../../../../hooks/useExamWorkspace";
 const CorrectionCard = ({
     question,
     index,
-    isActiveExamsFlow = false,
+    role = "student", // "student" atau "teacher"
+    currentStatus, // for teacher view state
+    onGrade, // for teacher grading action
+    isReadOnly = false, // backward compatibility
+    isActiveExamsFlow = false, // student view path styling accent
 }) => {
     if (!question) return null;
 
-    const isMultipleChoice = isMultipleChoiceQuestion(question);
-    const studentAnswerObj = question.student_answer || {};
+    const isMultipleChoice =
+        question.type === "multiple_choice" ||
+        question.type === "Pilihan ganda" ||
+        question.type === "Pilihan Ganda" ||
+        isMultipleChoiceQuestion(question);
 
-    const status = studentAnswerObj.status || "salah";
-    const percentage = studentAnswerObj.percentage ?? (status === "benar" ? 100 : 0);
+    // Determine status & percentage
+    const status =
+        currentStatus?.status ||
+        question.student_answer?.status ||
+        question.status ||
+        "salah";
+    const percentage =
+        currentStatus?.percentage ??
+        question.student_answer?.percentage ??
+        question.percentage ??
+        (status === "benar" ? 100 : 0);
 
+    // Determine student answer text
     let studentAnswerText = "Tidak dijawab";
     if (isMultipleChoice) {
-        studentAnswerText = studentAnswerObj.option_text || "Tidak dijawab";
+        studentAnswerText =
+            question.student_answer?.option_text ||
+            question.studentAnswer ||
+            "Tidak dijawab";
     } else {
-        studentAnswerText = studentAnswerObj.answer_text || "Tidak dijawab";
-        if (!studentAnswerObj.answer_text || studentAnswerObj.answer_text.trim() === "") {
+        studentAnswerText =
+            question.student_answer?.answer_text ||
+            question.studentAnswer ||
+            "Tidak dijawab";
+        if (
+            studentAnswerText !== "Tidak dijawab" &&
+            studentAnswerText.trim() === ""
+        ) {
             studentAnswerText = "Tidak dijawab";
         }
     }
 
+    const isEditable = role === "teacher" && !isReadOnly;
+
     return (
-        <div className="bg-white border border-[#EAECF0] rounded-2xl relative overflow-hidden shadow-sm">
-            {/* Side accent border */}
+        <div
+            className="bg-white border border-[#EAECF0] rounded-md relative overflow-hidden shadow-sm"
+        >
+            {/* Accent side border */}
             <div
-                className={`absolute left-0 top-0 bottom-0 w-1.5 ${isActiveExamsFlow ? "bg-[#3641f5]" : "bg-[#eef1f5]"
+                className={`absolute left-0 top-0 bottom-0 w-1.5 ${role === "teacher" || isActiveExamsFlow
+                        ? "bg-[#3641f5]"
+                        : "bg-[#eef1f5]"
                     }`}
             />
 
@@ -37,7 +69,9 @@ const CorrectionCard = ({
                     <span className="text-gray-500 font-medium text-sm">
                         #Soal {index + 1}
                     </span>
-                    <span className="px-3 py-1 bg-[#F5F8FF] text-[#3641f5] text-[12px] font-medium rounded-lg">
+                    <span
+                        className="px-3 py-1 bg-[#F5F8FF] text-[#3641f5] text-[12px] font-medium rounded-lg"
+                    >
                         {isMultipleChoice ? "Pilihan ganda" : "Esai"}
                     </span>
                 </div>
@@ -82,7 +116,9 @@ const CorrectionCard = ({
                     </div>
                 ) : (
                     <div className="flex flex-col gap-4">
-                        <div className="p-4 rounded-xl border bg-white border-gray-100 flex flex-col gap-3 shadow-sm min-h-30">
+                        <div
+                            className="p-4 rounded-xl border bg-white border-gray-100 flex flex-col gap-3 shadow-sm min-h-30"
+                        >
                             <span className="text-xs text-gray-400 font-medium">
                                 Jawaban Esai Siswa:
                             </span>
@@ -91,8 +127,11 @@ const CorrectionCard = ({
                             </p>
                         </div>
 
-                        {/* Essay Status Block */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-1">
+                        {/* Essay Status and Grading Block */}
+                        <div
+                            className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-1"
+                        >
+                            {/* Grading Status */}
                             <div className="flex items-center gap-2 text-sm text-[#344054] font-medium">
                                 <span>Status Penilaian:</span>
                                 <span
@@ -118,6 +157,40 @@ const CorrectionCard = ({
                                     )}
                                 </span>
                             </div>
+
+                            {/* Teacher Grading Action */}
+                            {isEditable && studentAnswerText !== "Tidak dijawab" && (
+                                <div className="flex items-center gap-2 self-end sm:self-auto">
+                                    <span className="text-sm font-medium text-[#475467]">
+                                        Berikan Penilaian (0-100):
+                                    </span>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        value={percentage ?? ""}
+                                        onChange={(e) => {
+                                            let rawVal = e.target.value;
+                                            if (rawVal === "") {
+                                                onGrade?.(question.id, {
+                                                    percentage: "",
+                                                    status: "pending",
+                                                });
+                                                return;
+                                            }
+                                            let val = parseInt(rawVal);
+                                            if (isNaN(val)) val = 0;
+                                            if (val > 100) val = 100;
+                                            if (val < 0) val = 0;
+                                            onGrade?.(question.id, {
+                                                percentage: val,
+                                                status: val > 0 ? "benar" : "salah",
+                                            });
+                                        }}
+                                        className="w-20 h-10 px-2 rounded-xl border border-gray-200 focus:border-[#3641f5] focus:ring-1 focus:ring-[#3641f5] outline-none transition-all text-center text-sm font-medium"
+                                    />
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}

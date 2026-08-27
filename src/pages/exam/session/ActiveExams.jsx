@@ -50,12 +50,16 @@ const ActiveExams = () => {
 
     const formattedExams = examsList.map((exam) => {
         return {
-            id: exam.id,
-            title: exam.title,
-            description: exam.description,
-            course: exam.course,
-            startTime: exam.start_time,
-            duration: exam.duration,
+            id: exam.id ?? exam.exam_id,
+            title: exam.title ?? exam.exam_title,
+            description: exam.description ?? exam.exam_description,
+            course: exam.course ?? { title: exam.course_title },
+            startTime:
+                exam.start_time ??
+                exam.startTime ??
+                exam.exam_start_time ??
+                exam.start_at,
+            duration: exam.duration ?? exam.duration_minutes ?? exam.exam_duration,
             status: formatExamStatus(exam.status),
         };
     });
@@ -64,7 +68,6 @@ const ActiveExams = () => {
 
     return (
         <div className="flex flex-col gap-6 w-full px-1 pb-10 relative">
-            {/* Header Section */}
             <div>
                 <h1 className="text-2xl font-medium text-[#1D2939] tracking-tight">
                     Daftar Ujian Saya
@@ -81,7 +84,6 @@ const ActiveExams = () => {
                     </div>
                 )}
 
-                {/* Search & Toolbar Section */}
                 <div className="p-5 border-b border-gray-100 flex items-end gap-3">
                     <div className="flex-1">
                         <Input
@@ -109,10 +111,8 @@ const ActiveExams = () => {
                     </div>
                 </div>
 
-                {/* Table Section */}
                 <ExamTableStudent data={displayData} role="student" />
 
-                {/* Pagination */}
                 <Pagination
                     currentPage={page}
                     totalPages={pagination.total_pages}

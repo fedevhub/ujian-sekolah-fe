@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, CircleNotch, CaretLeft } from "@phosphor-icons/react";
+import { Plus, CircleNotch } from "@phosphor-icons/react";
 import { useNavigate, useParams } from "react-router-dom";
 import Button from "../../components/button";
 import Input from "../../components/input";
@@ -59,7 +59,7 @@ const QuestionBank = () => {
         limit: 10,
     };
 
-    const loading = isLoading || deleteQuestionMutation.isPending;
+    const loading = isLoading || isFetching || deleteQuestionMutation.isPending;
 
     const handlePageChange = (newPage) => {
         setPagination((prev) => ({ ...prev, current_page: newPage }));
@@ -71,13 +71,13 @@ const QuestionBank = () => {
 
     const handleDeleteClick = (question) => {
         setSelectedQuestion(question);
-        deleteModal.onOpen();
+        deleteModal.open();
     };
 
     const handleDeleteConfirm = async (question) => {
         try {
             await deleteQuestionMutation.mutateAsync(question.id);
-            deleteModal.onClose();
+            deleteModal.close();
             setSelectedQuestion(null);
         } catch (err) {
             // Error ditangani secara internal di dalam komponen QuestionDelete
@@ -86,25 +86,17 @@ const QuestionBank = () => {
     };
 
     return (
-        <div className="flex flex-col min-h-screen bg-gray-50 p-6">
-            {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div className="flex w-full flex-col gap-6 px-1 pb-10">
+            <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
                 <div>
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-gray-700 mb-2"
-                    >
-                        <CaretLeft size={16} />
-                        Kembali
-                    </button>
-                    <h1 className="text-2xl font-bold text-gray-900">Bank Soal</h1>
-                    <p className="text-sm text-gray-500">
-                        Kelola daftar pertanyaan dan tipe soal untuk kursus ini.
+                    <h1 className="text-2xl font-medium tracking-tight text-[#1D2939]">Bank Soal</h1>
+                    <p className="mt-0.5 text-[#475467]">
+                        Pengelolaan dan penyusunan soal ujian dalam satu tempat.
                     </p>
                 </div>
                 <Button
                     variant="primary"
-                    className="gap-2"
+                    className="h-11 w-full gap-2 md:w-auto"
                     onClick={() => navigate(`/question-bank/${courseId}/create`)}
                 >
                     <Plus size={18} />
@@ -112,67 +104,62 @@ const QuestionBank = () => {
                 </Button>
             </div>
 
-            {/* Filter & Search Section */}
-            <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
-                <div className="w-full md:w-96">
-                    <Input
-                        placeholder="Cari pertanyaan..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
+            <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+                <div className="flex flex-col gap-4 border-b border-gray-100 p-5 md:flex-row md:items-end">
+                    <div className="flex flex-1 items-end gap-3">
+                        <div className="flex-1">
+                            <Input
+                                label="Search"
+                                placeholder="Cari soal..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                            />
+                        </div>
+                        <FilterDropdown
+                            options={[
+                                { label: "Semua Tipe", value: "" },
+                                { label: "Pilihan Ganda", value: "multiple_choice" },
+                                { label: "Esai", value: "essay" },
+                            ]}
+                            selectedValue={selectedType}
+                            onSelect={handleTypeSelect}
+                            className="w-full md:w-auto"
+                            placeholder="Filter"
+                        />
+                    </div>
                 </div>
-                <div className="flex items-center gap-3 w-full md:w-auto justify-end">
-                    <FilterDropdown
-                        options={[
-                            { label: "Semua Tipe", value: "" },
-                            { label: "Pilihan Ganda", value: "multiple_choice" },
-                            { label: "Esai", value: "essay" },
-                        ]}
-                        selectedValue={selectedType}
-                        onSelect={handleTypeSelect}
-                        placeholder="Filter Tipe Soal"
-                    />
-                    {isFetching && (
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
-                            <CircleNotch size={16} className="animate-spin" />
-                            Memperbarui...
+
+                <div className="relative min-h-50">
+                    {loading && (
+                        <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/50 backdrop-blur-[1px]">
+                            <CircleNotch size={32} className="animate-spin text-[#465FFF]" />
                         </div>
                     )}
+                    <QuestionTable
+                        questions={questions}
+                        currentPage={queryPagination.current_page}
+                        limit={queryPagination.limit}
+                        onEdit={(question) =>
+                            navigate(`/question-bank/${courseId}/edit/${question.id}`)
+                        }
+                        onDelete={handleDeleteClick}
+                    />
                 </div>
-            </div>
 
-            {/* Table Section */}
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-6 flex-1">
-                <QuestionTable
-                    questions={questions}
+                <Pagination
                     currentPage={queryPagination.current_page}
-                    limit={queryPagination.limit}
-                    onEdit={(question) =>
-                        navigate(`/question-bank/${courseId}/edit/${question.id}`)
-                    }
-                    onDelete={handleDeleteClick}
+                    totalPages={queryPagination.total_page}
+                    limit={pagination.limit}
+                    onPageChange={handlePageChange}
+                    onLimitChange={handleLimitChange}
                 />
             </div>
 
-            {/* Pagination Section */}
-            {queryPagination.total_page > 1 && (
-                <div className="flex justify-end">
-                    <Pagination
-                        currentPage={queryPagination.current_page}
-                        totalPage={queryPagination.total_page}
-                        limit={queryPagination.limit}
-                        totalData={queryPagination.total_data}
-                        onPageChange={handlePageChange}
-                        onLimitChange={handleLimitChange}
-                    />
-                </div>
-            )}
-
             {/* Delete Confirmation Modal */}
-            <Modal isOpen={deleteModal.isOpen} onClose={deleteModal.onClose}>
+            <Modal isOpen={deleteModal.isOpen} onClose={deleteModal.close}>
                 <QuestionDelete
                     question={selectedQuestion}
-                    onClose={deleteModal.onClose}
+                    onClose={deleteModal.close}
                     onDelete={handleDeleteConfirm}
                     isLoading={loading}
                     error={deleteQuestionMutation.error}
