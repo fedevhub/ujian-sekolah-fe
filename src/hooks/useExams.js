@@ -117,17 +117,18 @@ export const useMyExamsList = (params) => {
       if (!response.success)
         throw new Error("Gagal mengambil jadwal ujian saya");
       const payload = response.data;
-      const exams = Array.isArray(payload)
-        ? payload
-        : payload?.data ||
-          payload?.exams ||
-          payload?.items ||
-          payload?.rows ||
-          payload?.results ||
+      const result = payload?.data ?? payload;
+      const exams = Array.isArray(result)
+        ? result
+        : result?.data ||
+          result?.exams ||
+          result?.items ||
+          result?.rows ||
+          result?.results ||
           [];
-      const pagination = Array.isArray(payload)
-        ? {}
-        : payload?.pagination || {};
+      const pagination = Array.isArray(result)
+        ? payload?.pagination || {}
+        : result?.pagination || payload?.pagination || {};
       return {
         data: Array.isArray(exams) ? exams : [],
         pagination: {

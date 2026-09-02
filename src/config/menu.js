@@ -60,7 +60,7 @@ export const MENU_DATA = {
       icon: SquaresFour,
     },
     {
-      title: "Ujian Aktif",
+      title: "Ujian Saya",
       path: "/active-exams",
       icon: Exam,
     },

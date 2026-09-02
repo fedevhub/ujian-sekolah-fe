@@ -8,7 +8,6 @@ import { useDebounce } from "../../../hooks/useDebounce";
 import { CircleNotch } from "@phosphor-icons/react";
 import {
     formatExamStatus,
-    getBackendStatus,
 } from "../../../utils/statusMapper";
 
 const ActiveExams = () => {
@@ -26,7 +25,6 @@ const ActiveExams = () => {
         page,
         limit,
         search: debouncedSearch,
-        status: getBackendStatus(selectedStatus),
     });
 
     const loading = isLoading;
@@ -64,7 +62,9 @@ const ActiveExams = () => {
         };
     });
 
-    const displayData = formattedExams;
+    const displayData = selectedStatus
+        ? formattedExams.filter((exam) => exam.status === selectedStatus)
+        : formattedExams;
 
     return (
         <div className="flex flex-col gap-6 w-full px-1 pb-10 relative">
@@ -98,7 +98,7 @@ const ActiveExams = () => {
                         <FilterDropdown
                             options={[
                                 { label: "Semua Status", value: "" },
-                                ...["Tersedia", "Belum Mulai", "Sedang Ujian", "Terlewat"].map(
+                                ...["Tersedia", "Belum Mulai", "Sedang Ujian", "Selesai", "Terlewat"].map(
                                     (status) => ({
                                         label: status,
                                         value: status,
